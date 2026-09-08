@@ -8,7 +8,7 @@ from app.intelligence.title_normalizer import normalize_title
     [
         ("Software Engineer I", "Software Engineer"),
         ("Associate Software Developer", "Software Engineer"),
-        ("Junior Backend Engineer", "Backend Engineer"),
+        (" Backend Engineer", "Backend Engineer"),
         ("Graduate Full-Stack Engineer", "Full Stack Engineer"),
         ("iOS Engineer", "Mobile Engineer"),
     ],

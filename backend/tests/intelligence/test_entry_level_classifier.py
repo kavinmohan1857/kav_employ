@@ -41,3 +41,26 @@ def test_neutral_posting_is_uncertain() -> None:
 
     assert result.score == 45
     assert result.classification == "uncertain"
+
+
+def test_scores_experience_above_two_as_negative() -> None:
+    result = classify_entry_level(
+        raw_title="Software Engineer",
+        description="Build APIs.",
+        minimum_years_experience=3,
+        maximum_years_experience=4,
+    )
+
+    assert result.score == 15
+    assert "experience.above_two" in {reason.rule for reason in result.reasons}
+
+
+def test_detects_early_career_range_in_description() -> None:
+    result = classify_entry_level(
+        raw_title="Software Engineer",
+        description="Candidates should have 0-2 years of professional experience.",
+    )
+
+    assert result.score == 70
+    assert result.classification == "likely"
+    assert "description.early_career_experience" in {reason.rule for reason in result.reasons}

@@ -3,7 +3,17 @@ from datetime import datetime
 from enum import StrEnum
 from typing import Any, Self
 
-from pydantic import BaseModel, ConfigDict, Field, HttpUrl, computed_field, model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    HttpUrl,
+    computed_field,
+    field_validator,
+    model_validator,
+)
+
+from app.intelligence.entry_level_classifier import classification_band
 
 
 class WorkplaceType(StrEnum):
@@ -19,6 +29,23 @@ class EmploymentType(StrEnum):
     CONTRACT = "contract"
     INTERNSHIP = "internship"
     UNKNOWN = "unknown"
+
+
+class EntryLevelSuitability(StrEnum):
+    LIKELY = "likely"
+    UNCERTAIN = "uncertain"
+    UNLIKELY = "unlikely"
+
+
+class JobSortField(StrEnum):
+    CREATED_AT = "created_at"
+    DATE_POSTED = "date_posted"
+    ENTRY_LEVEL_SCORE = "entry_level_score"
+
+
+class SortOrder(StrEnum):
+    ASC = "asc"
+    DESC = "desc"
 
 
 class JobCreate(BaseModel):
@@ -39,8 +66,59 @@ class JobCreate(BaseModel):
     salary_max: int | None = Field(default=None, ge=0)
     salary_currency: str | None = Field(default=None, pattern=r"^[A-Za-z]{3}$")
 
+    @field_validator("raw_title", "raw_company", "raw_location", "description", "source")
+    @classmethod
+    def reject_blank_strings(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("must not be blank")
+        return value
+
     @model_validator(mode="after")
     def validate_ranges(self) -> Self:
+        if (
+            self.minimum_years_experience is not None
+            and self.maximum_years_experience is not None
+            and self.minimum_years_experience > self.maximum_years_experience
+        ):
+            raise ValueError("minimum_years_experience cannot exceed maximum_years_experience")
+        if (
+            self.salary_min is not None
+            and self.salary_max is not None
+            and self.salary_min > self.salary_max
+        ):
+            raise ValueError("salary_min cannot exceed salary_max")
+        return self
+
+
+class JobUpdate(BaseModel):
+    raw_title: str | None = Field(default=None, min_length=1, max_length=300)
+    raw_company: str | None = Field(default=None, min_length=1, max_length=300)
+    raw_location: str | None = Field(default=None, min_length=1, max_length=300)
+    description: str | None = Field(default=None, min_length=1)
+    workplace_type: WorkplaceType | None = None
+    source: str | None = Field(default=None, min_length=1, max_length=100)
+    source_external_id: str | None = Field(default=None, max_length=300)
+    source_url: HttpUrl | None = None
+    apply_url: HttpUrl | None = None
+    date_posted: datetime | None = None
+    employment_type: EmploymentType | None = None
+    minimum_years_experience: float | None = Field(default=None, ge=0, le=99)
+    maximum_years_experience: float | None = Field(default=None, ge=0, le=99)
+    salary_min: int | None = Field(default=None, ge=0)
+    salary_max: int | None = Field(default=None, ge=0)
+    salary_currency: str | None = Field(default=None, pattern=r"^[A-Za-z]{3}$")
+
+    @field_validator("raw_title", "raw_company", "raw_location", "description", "source")
+    @classmethod
+    def reject_null_or_blank_required_strings(cls, value: str | None) -> str:
+        if value is None:
+            raise ValueError("must not be null")
+        if not value.strip():
+            raise ValueError("must not be blank")
+        return value
+
+    @model_validator(mode="after")
+    def validate_provided_ranges(self) -> Self:
         if (
             self.minimum_years_experience is not None
             and self.maximum_years_experience is not None
@@ -97,8 +175,11 @@ class JobResponse(BaseModel):
     @computed_field
     @property
     def entry_level_classification(self) -> str:
-        if self.entry_level_score >= 70:
-            return "likely"
-        if self.entry_level_score >= 40:
-            return "uncertain"
-        return "unlikely"
+        return classification_band(self.entry_level_score)
+
+
+class JobListResponse(BaseModel):
+    items: list[JobResponse]
+    total: int
+    limit: int
+    offset: int

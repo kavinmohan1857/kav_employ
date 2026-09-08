@@ -41,7 +41,7 @@ NEGATIVE_TITLE_RULES: tuple[tuple[str, str, int, str], ...] = (
 )
 
 
-def _band(score: int) -> str:
+def classification_band(score: int) -> str:
     if score >= 70:
         return "likely"
     if score >= 40:
@@ -138,4 +138,4 @@ def classify_entry_level(
         )
 
     score = max(0, min(100, score))
-    return ClassificationResult(score, _band(score), tuple(reasons))
+    return ClassificationResult(score, classification_band(score), tuple(reasons))

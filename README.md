@@ -2,11 +2,14 @@
 
 KavEmploy is a job search intelligence system for discovering, organizing, and evaluating early-career software engineering opportunities. Its initial focus is Class of 2026 candidates searching for full-time roles in the Chicago area.
 
-Milestone 1 provides a FastAPI and PostgreSQL vertical slice: create a job, normalize its source data, calculate an explainable entry-level suitability score, persist it, and retrieve it.
+Milestone 2 provides a complete job-management API: create, retrieve, list, filter, sort, update, and delete jobs while automatically maintaining normalized and intelligence-derived fields.
 
 ## Current capabilities
 
 - Store manually entered job postings through a validated API.
+- List jobs with pagination, filters, and deterministic sorting.
+- Partially update jobs while recalculating affected derived fields.
+- Delete jobs and receive consistent not-found responses.
 - Preserve source values in `raw_*` fields and create deterministic normalized values.
 - Normalize common software engineering title variants.
 - Score entry-level suitability with versioned, explainable rules.
@@ -14,6 +17,7 @@ Milestone 1 provides a FastAPI and PostgreSQL vertical slice: create a job, norm
 - Manage schema changes with Alembic migrations.
 - Exercise business rules and API behavior with automated tests.
 - Explore the API through FastAPI's generated OpenAPI documentation.
+- Distinguish process liveness from database readiness.
 
 ## Repository structure
 
@@ -53,6 +57,8 @@ Start PostgreSQL:
 docker compose up -d db
 ```
 
+KavEmploy maps PostgreSQL to host port `5433` to avoid conflicts with PostgreSQL installations using the default host port `5432`. Inside the container, PostgreSQL still uses port `5432`.
+
 Create and activate a virtual environment, then install the backend:
 
 ```powershell
@@ -69,7 +75,33 @@ alembic upgrade head
 uvicorn app.main:app --reload
 ```
 
-Open `http://127.0.0.1:8000/docs` for interactive API documentation, or request `http://127.0.0.1:8000/health` for the health endpoint.
+Open `http://127.0.0.1:8000/docs` for interactive API documentation. Use `/health` to check process liveness and `/health/ready` to verify database connectivity.
+
+## Job API
+
+```text
+POST   /api/v1/jobs           Create and analyze a job
+GET    /api/v1/jobs           List, filter, sort, and paginate jobs
+GET    /api/v1/jobs/{id}      Retrieve one job
+PATCH  /api/v1/jobs/{id}      Partially update and reanalyze a job
+DELETE /api/v1/jobs/{id}      Delete a job
+```
+
+The list endpoint accepts:
+
+- `company`, `title`, and `location` normalized text filters
+- `suitability`: `likely`, `uncertain`, or `unlikely`
+- `sort_by`: `created_at`, `date_posted`, or `entry_level_score`
+- `sort_order`: `asc` or `desc`
+- `limit` from 1 through 100 and a non-negative `offset`
+
+Example:
+
+```text
+GET /api/v1/jobs?location=Chicago&suitability=likely&sort_by=entry_level_score&sort_order=desc
+```
+
+List responses include `items`, `total`, `limit`, and `offset` so clients can build pagination without additional requests.
 
 ## Example request
 
@@ -106,4 +138,4 @@ Tests use an isolated in-memory database. Local application execution uses Postg
 
 ## Deliberate V1 limits
 
-KavEmploy does not scrape restricted job boards. Authentication, automated ingestion, application tracking, frontend screens, AI matching, and AWS infrastructure are deferred to later milestones.
+KavEmploy does not scrape restricted job boards. Authentication, automated ingestion, application tracking, dashboard statistics, frontend screens, AI matching, and AWS infrastructure are deferred to later milestones.
