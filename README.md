@@ -1,4 +1,4 @@
-# KavEmploy
+# KavEmploy (currently a work in progress)
 
 KavEmploy is a job search intelligence system for discovering, organizing, and evaluating early-career software engineering opportunities. Its initial focus is Class of 2026 candidates searching for full-time roles in the Chicago area.
 
