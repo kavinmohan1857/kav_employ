@@ -1,13 +1,16 @@
 import uuid
 from datetime import datetime
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from sqlalchemy import CheckConstraint, DateTime, Integer, Numeric, String, Text, func
 from sqlalchemy.dialects.postgresql import JSONB
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.types import JSON, Uuid
 
 from app.db.session import Base
+
+if TYPE_CHECKING:
+    from app.models.application import Application
 
 
 class Job(Base):
@@ -65,4 +68,7 @@ class Job(Base):
     )
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False
+    )
+    application: Mapped["Application | None"] = relationship(
+        back_populates="job", cascade="all, delete-orphan", passive_deletes=True
     )

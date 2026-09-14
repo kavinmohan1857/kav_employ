@@ -2,7 +2,7 @@
 
 KavEmploy is a job search intelligence system for discovering, organizing, and evaluating early-career software engineering opportunities. Its initial focus is Class of 2026 candidates searching for full-time roles in the Chicago area.
 
-Milestone 2 provides a complete job-management API: create, retrieve, list, filter, sort, update, and delete jobs while automatically maintaining normalized and intelligence-derived fields.
+Milestone 3 provides job and application tracking APIs plus dashboard statistics. Jobs can be created, filtered, updated, and analyzed, then tracked from saved through offer or rejection.
 
 ## Current capabilities
 
@@ -10,6 +10,9 @@ Milestone 2 provides a complete job-management API: create, retrieve, list, filt
 - List jobs with pagination, filters, and deterministic sorting.
 - Partially update jobs while recalculating affected derived fields.
 - Delete jobs and receive consistent not-found responses.
+- Track one current application state per job from saved through offer or withdrawal.
+- Record application dates, referrals, notes, and interview stages.
+- Summarize job inventory, likely entry-level roles, weekly discoveries, and submissions.
 - Preserve source values in `raw_*` fields and create deterministic normalized values.
 - Normalize common software engineering title variants.
 - Score entry-level suitability with versioned, explainable rules.
@@ -85,6 +88,12 @@ GET    /api/v1/jobs           List, filter, sort, and paginate jobs
 GET    /api/v1/jobs/{id}      Retrieve one job
 PATCH  /api/v1/jobs/{id}      Partially update and reanalyze a job
 DELETE /api/v1/jobs/{id}      Delete a job
+
+PUT    /api/v1/jobs/{id}/application     Create or replace application tracking
+GET    /api/v1/jobs/{id}/application     Retrieve application tracking
+DELETE /api/v1/jobs/{id}/application     Remove tracking without deleting the job
+
+GET    /api/v1/dashboard/summary         Retrieve dashboard statistics
 ```
 
 The list endpoint accepts:
@@ -102,6 +111,8 @@ GET /api/v1/jobs?location=Chicago&suitability=likely&sort_by=entry_level_score&s
 ```
 
 List responses include `items`, `total`, `limit`, and `offset` so clients can build pagination without additional requests.
+
+Application statuses are `saved`, `applied`, `interview`, `rejected`, `offer`, and `withdrawn`. Entering a submitted-stage status automatically records the first application timestamp when one was not supplied. The dashboard excludes `saved` jobs from `applications_submitted`, and defines the current week as Monday 00:00 UTC onward.
 
 ## Example request
 
@@ -138,4 +149,4 @@ Tests use an isolated in-memory database. Local application execution uses Postg
 
 ## Deliberate V1 limits
 
-KavEmploy does not scrape restricted job boards. Authentication, automated ingestion, application tracking, dashboard statistics, frontend screens, AI matching, and AWS infrastructure are deferred to later milestones.
+KavEmploy does not scrape restricted job boards. Authentication, automated ingestion, status history, frontend screens, AI matching, and AWS infrastructure are deferred to later milestones.

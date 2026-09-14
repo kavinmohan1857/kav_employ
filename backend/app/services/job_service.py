@@ -8,6 +8,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.core.exceptions import DatabaseOperationError, InvalidJobUpdateError
+from app.db.transactions import commit_or_raise
 from app.intelligence.duplicate_fingerprint import build_duplicate_fingerprint
 from app.intelligence.entry_level_classifier import classify_entry_level
 from app.intelligence.normalization import normalize_company, normalize_location
@@ -53,18 +54,10 @@ def _derived_values(job_data: JobCreate) -> dict[str, Any]:
     }
 
 
-def _commit(session: Session) -> None:
-    try:
-        session.commit()
-    except SQLAlchemyError as error:
-        session.rollback()
-        raise DatabaseOperationError("The database operation could not be completed") from error
-
-
 def create_job(session: Session, job_data: JobCreate) -> Job:
     job = Job(**_serialize_input(job_data), **_derived_values(job_data))
     session.add(job)
-    _commit(session)
+    commit_or_raise(session)
     session.refresh(job)
     return job
 
@@ -129,11 +122,11 @@ def update_job(session: Session, job: Job, update_data: JobUpdate) -> Job:
     for field, value in _derived_values(validated).items():
         setattr(job, field, value)
 
-    _commit(session)
+    commit_or_raise(session)
     session.refresh(job)
     return job
 
 
 def delete_job(session: Session, job: Job) -> None:
     session.delete(job)
-    _commit(session)
+    commit_or_raise(session)
