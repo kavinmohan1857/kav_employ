@@ -44,6 +44,7 @@ The project is a modular monolith. Intelligence rules are separate from HTTP and
 ## Prerequisites
 
 - Python 3.11 or newer
+- Node.js 18 or newer
 - Docker with Docker Compose
 
 ## Local setup
@@ -79,6 +80,18 @@ uvicorn app.main:app --reload
 ```
 
 Open `http://127.0.0.1:8000/docs` for interactive API documentation. Use `/health` to check process liveness and `/health/ready` to verify database connectivity.
+
+### Start the frontend
+
+In a second terminal from the repository root:
+
+```powershell
+Set-Location frontend
+npm install
+npm run dev
+```
+
+Open `http://127.0.0.1:5173`. The frontend uses `VITE_API_BASE_URL` when configured and otherwise connects to `http://127.0.0.1:8000`.
 
 ## Job API
 
@@ -143,6 +156,13 @@ From `backend/` with the development dependencies installed:
 ```powershell
 pytest
 ruff check .
+```
+
+From `frontend/`:
+
+```powershell
+npm test
+npm run build
 ```
 
 Tests use an isolated in-memory database. Local application execution uses PostgreSQL through `DATABASE_URL`.

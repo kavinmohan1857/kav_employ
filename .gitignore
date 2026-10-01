@@ -10,5 +10,5 @@ htmlcov/
 .idea/
 .vscode/
 node_modules/
+.npm-cache/
 dist/
-
