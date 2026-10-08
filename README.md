@@ -81,7 +81,31 @@ uvicorn app.main:app --reload
 
 Open `http://127.0.0.1:8000/docs` for interactive API documentation. Use `/health` to check process liveness and `/health/ready` to verify database connectivity.
 
-### Start the frontend
+### Personal fit rules
+
+Job responses include `personal_fit`, evaluated against a local candidate profile separately
+from entry-level suitability. The default graduation month is May 2026; skills start empty.
+Set these values in the root `.env`, then restart the backend:
+
+```dotenv
+CANDIDATE_GRADUATION_DATE=2026-05-01
+CANDIDATE_SKILLS=["Python","PostgreSQL","Git"]
+```
+
+Replace the sample skills with your own. Job details show eligibility, a rule score (not a
+probability), and the source sentences. Missing skills are unknown, never assumed absent.
+Graduation matching supports explicit full-month/year windows and before/after/by deadlines;
+ambiguous graduation language requires review. The skill vocabulary currently includes
+Python, Java, JavaScript, TypeScript, SQL, PostgreSQL, React, Node.js, AWS, Docker,
+Kubernetes, C++, C#, and Git. Required/preferred headings and explicit alternatives are
+recognized; complex clauses still need manual review. Resume extraction is deferred.
+
+For a temporary profile without changing settings, use
+`POST /api/v1/intelligence/personal-fit` with `description` and a `profile` object containing
+`graduation_date` and `skills`. This does not save the profile. Existing jobs are evaluated
+on read, so changing the configured profile requires no database migration or job edits.
+
+### Run the frontend
 
 In a second terminal from the repository root:
 

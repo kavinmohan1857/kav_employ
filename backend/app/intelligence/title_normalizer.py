@@ -9,6 +9,15 @@ TITLE_FAMILIES: tuple[tuple[str, tuple[str, ...]], ...] = (
     ("Mobile Engineer", ("mobile", "ios", "android")),
     ("DevOps Engineer", ("devops", "site reliability", "sre")),
     ("Data Engineer", ("data engineer",)),
+    ("Data Scientist", ("data scientist", "ml engineer", "machine learning engineer")),
+    ("Machine Learning Engineer", ("machine learning engineer", "ml engineer")),
+    ("Product Manager", ("product manager", "pm")),
+    ("Designer", ("designer", "ux", "ui")),
+    ("QA Engineer", ("qa", "quality assurance", "test engineer")),
+    ("Intern", ("intern", "internship")),
+    ("Director", ("director",)),
+    ("Vice President", ("vp", "vice president")),
+    ("CEO", ("ceo", "chief executive officer"))
 )
 
 

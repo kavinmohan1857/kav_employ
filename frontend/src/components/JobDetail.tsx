@@ -61,6 +61,13 @@ export function JobDetail({
         <div>
           <span className="section-kicker">Entry-level intelligence</span>
           <h3>{job.entry_level_classification} fit</h3>
+          <p>This score estimates whether the role is entry-level. It starts at 45;
+            recognized title, experience, and education signals adjust it. It is not a percentage match to your resume.</p>
+          {job.entry_level_reasons.every((reason) => reason.contribution === 0) && (
+            <p>No scoring signals were recognized, so the score stays at 45.
+              A title without senior keywords alone does not establish an entry-level role.
+              Review the description and the personal requirements below.</p>
+          )}
           <ul>
             {job.entry_level_reasons.map((reason) => (
               <li key={reason.rule}>
@@ -71,6 +78,37 @@ export function JobDetail({
           </ul>
         </div>
       </section>
+
+      {job.personal_fit ? (
+        <section className="description-section">
+          <span className="section-kicker">Personal fit</span>
+          <h3>{job.personal_fit.eligibility.replaceAll("_", " ")}</h3>
+          <p>Rule score: {job.personal_fit.score}/100. Unrecorded skills need review.</p>
+          <p>Graduation eligibility and technical requirements are evaluated separately from the entry-level score.
+            A graduation conflict requires attention even when skills match.</p>
+          {!job.personal_fit.findings.some((finding) => finding.category === "graduation") && (
+            <p>Graduation: no supported date requirement was detected. Eligibility remains unverified.</p>
+          )}
+          {!job.personal_fit.findings.some((finding) => finding.category === "skills") && (
+            <p>Skills: no technologies from the supported vocabulary were detected. Technical fit remains unverified.</p>
+          )}
+          <ul>
+            {job.personal_fit.findings.map((finding, index) => (
+              <li key={index}>
+                <strong>{finding.status}: </strong>{finding.message}
+                <span> ({finding.contribution > 0 ? "+" : ""}{finding.contribution} points)</span>
+                <blockquote>{finding.evidence}</blockquote>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : (
+        <section className="description-section" role="status">
+          <span className="section-kicker">Personal fit unavailable</span>
+          <p>The API did not return graduation or skill analysis. Restart the backend with the latest code,
+            then refresh this page.</p>
+        </section>
+      )}
 
       <section className="detail-facts">
         <div><span>Workplace</span><strong>{job.workplace_type?.replace("_", " ") ?? "Not specified"}</strong></div>

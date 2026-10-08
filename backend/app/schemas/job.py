@@ -13,7 +13,9 @@ from pydantic import (
     model_validator,
 )
 
+from app.core.config import get_settings
 from app.intelligence.entry_level_classifier import classification_band
+from app.intelligence.personal_fit import CandidateProfile, PersonalFit, analyze_personal_fit
 
 
 class WorkplaceType(StrEnum):
@@ -176,6 +178,15 @@ class JobResponse(BaseModel):
     @property
     def entry_level_classification(self) -> str:
         return classification_band(self.entry_level_score)
+
+    @computed_field
+    @property
+    def personal_fit(self) -> PersonalFit:
+        settings = get_settings()
+        return analyze_personal_fit(self.description, CandidateProfile(
+            graduation_date=settings.candidate_graduation_date,
+            skills=settings.candidate_skills,
+        ))
 
 
 class JobListResponse(BaseModel):

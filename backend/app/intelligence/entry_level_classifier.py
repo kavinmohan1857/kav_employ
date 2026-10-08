@@ -38,6 +38,12 @@ NEGATIVE_TITLE_RULES: tuple[tuple[str, str, int, str], ...] = (
     (r"\bsenior\b|\bsr\.?\b", "title.senior", -60, "Title contains a senior-level indicator"),
     (r"\blead\b", "title.lead", -50, "Title contains a lead-level indicator"),
     (r"\bmanager\b", "title.manager", -60, "Title contains a management-level indicator"),
+    (r"\bdirector\b", "title.director", -55, "Title contains a director-level indicator"),
+    (r"\bvp\b|\bvice president\b", "title.vice_president", -50, "Title contains a vice president-level indicator"),
+    (r"\bceo\b|\bchief executive officer\b", "title.ceo", -80, "Title contains a CEO-level indicator"),
+    (r"\bintern\b", "title.intern", -20, "Title contains an intern-level indicator"),
+    (r"\bjunior\b", "title.junior", -10, "Title contains a junior-level indicator")
+
 )
 
 

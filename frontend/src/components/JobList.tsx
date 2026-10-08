@@ -45,7 +45,7 @@ export function JobList({ jobs, selectedId, loading, onSelect }: JobListProps) {
         >
           <div className="job-card-topline">
             <span className={`score-pill score-${job.entry_level_classification}`}>
-              {job.entry_level_score}% match
+              {job.entry_level_score}/100 entry-level
             </span>
             <span className="muted">Added {formatDate(job.first_seen_at)}</span>
           </div>

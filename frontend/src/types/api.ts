@@ -37,6 +37,18 @@ export interface Job {
   salary_max: number | null;
   salary_currency: string | null;
   entry_level_score: number;
+  personal_fit?: {
+    version: string;
+    eligibility: "likely_eligible" | "likely_ineligible" | "needs_review";
+    score: number;
+    findings: Array<{
+      category: "graduation" | "skills";
+      status: "satisfied" | "conflicting" | "unknown";
+      contribution: number;
+      evidence: string;
+      message: string;
+    }>;
+  };
   entry_level_reasons: ClassificationReason[];
   entry_level_classification: Suitability;
   classifier_version: string;
