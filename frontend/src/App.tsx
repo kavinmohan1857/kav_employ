@@ -6,6 +6,7 @@ import { JobDetail } from "./components/JobDetail";
 import { JobFilters } from "./components/JobFilters";
 import { JobForm } from "./components/JobForm";
 import { JobList } from "./components/JobList";
+import { NotFound } from "./components/NotFound";
 import type { DashboardSummary, Job, JobFilters as JobFiltersType, JobInput } from "./types/api";
 
 const PAGE_SIZE = 12;
@@ -19,6 +20,10 @@ const defaultFilters: JobFiltersType = {
 };
 
 export default function App() {
+  return window.location.pathname === "/" ? <Dashboard /> : <NotFound />;
+}
+
+function Dashboard() {
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
   const [jobs, setJobs] = useState<Job[]>([]);
   const [total, setTotal] = useState(0);
