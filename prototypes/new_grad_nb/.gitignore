@@ -1,0 +1,7 @@
+.venv/
+data/raw/*
+!data/raw/.gitkeep
+data/reviewed/*
+!data/reviewed/.gitkeep
+artifacts/*
+!artifacts/.gitkeep
